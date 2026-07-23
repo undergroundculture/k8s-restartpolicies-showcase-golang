@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: restart-policies
+  labels:
+    app: restart-policies
+spec:
+  containers:
+  - name: restart-policies
+    image: undergroundculture/restart-policies:1.0
+    #restartPolicy: Always
+    restartPolicy: OnFailure
+    #restartPolicy: Never
+    imagePullPolicy: IfNotPresent
+    resources:
+      limits:
+        cpu: 10m
+        memory: 28Mi
+      requests:
+        cpu: 10m
+        memory: 28Mi

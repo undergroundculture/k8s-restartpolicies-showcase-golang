@@ -1,0 +1,77 @@
+# you will see that restartPolicy except always is not applyied
+# pods always will be restarted
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: restart-policies
+  labels:
+    app: restart-policies
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: restart-policies
+  template:
+    metadata:
+      labels:
+        app: restart-policies
+    spec:
+      containers:
+      - name: restart-policies
+        image: undergroundculture/restart-policies:1.0
+        #restartPolicy: Always
+        #restartPolicy: OnFailure
+        restartPolicy: Never
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: 10m
+            memory: 28Mi
+          requests:
+            cpu: 10m
+            memory: 28Mi
+        startupProbe:
+          httpGet:
+            path: /startup
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          failureThreshold: 3
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /liveness
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+          timeoutSeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: restart-policies
+  labels:
+    app: restart-policies
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: restart-policies
